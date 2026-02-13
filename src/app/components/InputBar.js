@@ -3,7 +3,7 @@ import { useState, useRef } from "react";
 
 export default function InputBar({ onSend }) {
   const [value, setValue] = useState("");
-  const [novaThink, setNovaThink] = useState(false);
+  const [blueboxThink, setBlueboxThink] = useState(false);
   const [search, setSearch] = useState(false);
   const [listening, setListening] = useState(false);
   const recognitionRef = useRef(null);
@@ -13,7 +13,7 @@ export default function InputBar({ onSend }) {
 
     // Construct the message based on toggles
     let finalValue = value;
-    if (novaThink) finalValue = `[NovaThink] ${finalValue}`;
+    if (blueboxThink) finalValue = `[BlueboxThink] ${finalValue}`;
     if (search) finalValue = `[Search] ${finalValue}`;
 
     onSend(finalValue);
@@ -63,7 +63,7 @@ export default function InputBar({ onSend }) {
                 send();
               }
             }}
-            placeholder="Message Nova"
+            placeholder="Message Bluebox"
             rows={1}
             className="w-full bg-transparent outline-none text-gray-800 text-lg placeholder-gray-400 resize-none max-height-[200px] py-1"
           />

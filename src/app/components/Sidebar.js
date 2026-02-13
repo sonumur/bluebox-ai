@@ -142,10 +142,9 @@ export default function Sidebar({ isOpen, onClose, onSelectChat, onNewChat, acti
                         >
                             <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-300 border border-gray-200">
                                 <img
-                                    src={user?.photoURL || "/user-avatar.png"}
+                                    src={user?.photoURL || 'https://ui-avatars.com/api/?name=' + (user?.displayName || user?.email || 'User') + '&background=random'}
                                     alt="User"
                                     className="w-full h-full object-cover"
-                                    onError={(e) => e.target.src = 'https://ui-avatars.com/api/?name=' + (user?.displayName || user?.email || 'User') + '&background=random'}
                                 />
                             </div>
                             <div className="flex-1 truncate">

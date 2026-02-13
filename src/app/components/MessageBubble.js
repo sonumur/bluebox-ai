@@ -16,9 +16,9 @@ function MessageBubble({ role, content, isTyping }) {
         {!isUser && (
           <div className="flex items-center gap-2 mb-2">
             <div className="w-6 h-6 bg-[#4d6bfe]/10 rounded-md flex items-center justify-center p-1">
-              <img src="/logo.svg" alt="Nova" className="w-full h-full" />
+              <img src="/logo.svg" alt="Bluebox" className="w-full h-full" />
             </div>
-            <span className="text-xs font-bold text-gray-500 uppercase tracking-tight">Nova-V3</span>
+            <span className="text-xs font-bold text-gray-500 uppercase tracking-tight">Bluebox-V1</span>
           </div>
         )}
 
