@@ -566,7 +566,7 @@ export default function Chat() {
         {/* INPUT AREA (Translucent Glassmorphism) */}
         <div className="bg-white/80 backdrop-blur-xl px-4 md:px-6 py-4 md:py-6 z-30 relative border-t border-white/20">
           <div className="max-w-3xl mx-auto">
-            <InputBar onSend={sendMessage} />
+            <InputBar onSend={sendMessage} isPro={userData?.isPro} />
             <div className="mt-2 md:mt-4 text-center">
               <p className="text-[10px] md:text-[11px] text-gray-400 font-bold">
                 Bluebox can make mistakes. Please check important information.
