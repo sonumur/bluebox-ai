@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { auth, googleProvider } from "../lib/firebase";
 import { signInWithPopup, onAuthStateChanged } from "firebase/auth";
 import { useRouter } from "next/navigation";
+import Head from "next/head";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -48,6 +49,10 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#fcfcfc] flex flex-col items-center justify-center font-sans text-gray-900 relative overflow-hidden">
+      <Head>
+        <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-2207409421620882"
+          crossorigin="anonymous"></script>
+      </Head>
       {/* Background Accent */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-4xl h-64 bg-gradient-to-b from-[#4d6bfe]/5 to-transparent pointer-events-none" />
 
