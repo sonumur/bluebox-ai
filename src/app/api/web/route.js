@@ -41,7 +41,7 @@ export async function GET(req) {
             });
         } else {
             console.log(`Web API: Searching DuckDuckGo for: ${query}`);
-            const searchUrl = `https://duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
+            const searchUrl = `https://html.duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
             const searchRes = await fetch(searchUrl, {
                 headers: {
                     "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
@@ -61,13 +61,15 @@ export async function GET(req) {
 
             const searchHtml = await searchRes.text();
 
-            // Parse DDG HTML results
+            // Parse DDG HTML results - use a more robust regex to find result blocks
             const results = [];
-            const resultBlocks = searchHtml.split('class="result__body"').slice(1, 4); // Top 3 results (fewer but better context)
+            // Look for result__body class which can be mixed with other classes
+            const resultBlocks = searchHtml.split(/class="[^"]*result__body[^"]*"/).slice(1, 4);
 
             resultBlocks.forEach(block => {
-                const titleMatch = block.match(/class="result__a"[^>]*>([\s\S]*?)<\/a>/);
-                const snippetMatch = block.match(/class="result__snippet"[^>]*>([\s\S]*?)<\/a>/);
+                // More robust title and snippet matching
+                const titleMatch = block.match(/class="[^"]*result__a[^"]*"[^>]*>([\s\S]*?)<\/a>/);
+                const snippetMatch = block.match(/class="[^"]*result__snippet[^"]*"[^>]*>([\s\S]*?)<\/a>/);
 
                 if (titleMatch && snippetMatch) {
                     const title = titleMatch[1].replace(/<[^>]+>/g, "").trim();
