@@ -19,7 +19,8 @@ import {
   updateDoc,
   where,
   getDocs,
-  limit
+  limit,
+  increment
 } from "firebase/firestore";
 import { signInAnonymously, onAuthStateChanged } from "firebase/auth";
 
@@ -202,15 +203,6 @@ export default function Chat() {
     let effectiveMessageCount = userData?.dailyMessageCount || 0;
     if (userData?.lastUsageReset !== today) {
       effectiveMessageCount = 0; // Reset conceptually for this request
-      try {
-        await updateDoc(doc(db, "users", user.uid), {
-          dailyMessageCount: 0,
-          dailyTokenCount: 0,
-          lastUsageReset: today
-        });
-      } catch (err) {
-        console.warn("Usage reset failed:", err);
-      }
     }
 
     // Check message limit for free users using the effective count
@@ -233,11 +225,22 @@ export default function Chat() {
 
       await addDoc(collection(db, "chats", chatId, "messages"), messageData);
 
-      // Increment usage count in Firestore
+      // Increment usage count in Firestore (Atomic)
       try {
-        await updateDoc(doc(db, "users", user.uid), {
-          dailyMessageCount: (userData?.dailyMessageCount || 0) + 1
-        });
+        const userRef = doc(db, "users", user.uid);
+        if (userData?.lastUsageReset !== today) {
+          // If first message of the day, reset and increment together
+          await updateDoc(userRef, {
+            dailyMessageCount: 1,
+            dailyTokenCount: 0,
+            lastUsageReset: today
+          });
+        } else {
+          // Otherwise just increment
+          await updateDoc(userRef, {
+            dailyMessageCount: increment(1)
+          });
+        }
       } catch (err) {
         console.warn("Could not increment usage count:", err);
       }
@@ -294,9 +297,14 @@ export default function Chat() {
             const webData = await webRes.json();
             if (webData.content) {
               webContext = `REAL-TIME WEB CONTEXT (${webData.type === 'scrape' ? 'from ' + webData.url : 'Search results for ' + webData.query}):\n\n${webData.content}`;
+            } else if (webData.error) {
+              webContext = `The user specifically requested a web search/read for "${queryTerm}", but it failed: ${webData.error}. Please apologize and explain that you couldn't access the web at this moment.`;
+            } else {
+              webContext = `The user specifically requested a web search for "${queryTerm}", but no relevant results were found. Please mention this to the user.`;
             }
           } catch (webErr) {
             console.error("Chat: Web fetch failed:", webErr);
+            webContext = `A web search was attempted for "${queryTerm}" but a technical error occurred. Please inform the user.`;
           } finally {
             setMessages(prev => prev.filter(m => m.id !== "temp-web-status"));
           }

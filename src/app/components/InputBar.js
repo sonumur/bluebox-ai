@@ -56,6 +56,8 @@ export default function InputBar({ onSend }) {
     onSend(finalValue);
     setValue("");
     setNews(false); // Reset news toggle after send
+    setSearch(false);
+    setBlueboxThink(false);
   }
 
   function startVoice() {

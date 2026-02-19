@@ -44,9 +44,16 @@ export async function GET(req) {
             const searchUrl = `https://duckduckgo.com/html/?q=${encodeURIComponent(query)}`;
             const searchRes = await fetch(searchUrl, {
                 headers: {
-                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+                    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
                 }
             });
+
+            if (searchRes.status === 403 || searchRes.status === 429) {
+                return NextResponse.json({
+                    error: "Search service is temporarily limited",
+                    details: "DuckDuckGo is blocking the request. Please try again later or use Live News."
+                }, { status: 503 });
+            }
 
             if (!searchRes.ok) {
                 throw new Error(`DuckDuckGo error: ${searchRes.status}`);
@@ -56,7 +63,7 @@ export async function GET(req) {
 
             // Parse DDG HTML results
             const results = [];
-            const resultBlocks = searchHtml.split('class="result__body"').slice(1, 6); // Top 5 results
+            const resultBlocks = searchHtml.split('class="result__body"').slice(1, 4); // Top 3 results (fewer but better context)
 
             resultBlocks.forEach(block => {
                 const titleMatch = block.match(/class="result__a"[^>]*>([\s\S]*?)<\/a>/);
