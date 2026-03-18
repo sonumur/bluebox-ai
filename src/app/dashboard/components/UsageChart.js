@@ -1,6 +1,5 @@
 "use client";
-
-import { useEffect, useState, useMemo } from "react";
+import { useMemo } from "react";
 import {
     LineChart,
     Line,
@@ -34,10 +33,10 @@ export default function UsageChart({
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
             return (
-                <div className="bg-white p-4 border-2 border-[#1c1917] shadow-none">
-                    <p className="text-[10px] font-black text-stone-400 mb-2 uppercase tracking-widest">{label}</p>
-                    <p className="text-xl font-black text-[#1c1917] tabular-nums">
-                        {payload[0].value} <span className="text-[10px] uppercase font-black text-[#4d6bfe]">Units</span>
+                <div className="bg-white p-4 border border-gray-100 rounded-xl shadow-lg">
+                    <p className="text-xs font-semibold text-gray-500 mb-1">{label}</p>
+                    <p className="text-lg font-bold text-gray-900 tabular-nums">
+                        {payload[0].value} <span className="text-xs font-medium text-indigo-600">Users</span>
                     </p>
                 </div>
             );
@@ -46,66 +45,66 @@ export default function UsageChart({
     };
 
     return (
-        <div className="bg-white p-12 border-b-2 border-[#1c1917] w-full transition-all">
-            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-12 gap-8 border-b border-stone-100 pb-10">
+        <div className="bg-white p-6 sm:p-8 w-full transition-all rounded-2xl">
+            <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-8 gap-6 border-b border-gray-100 pb-6">
                 <div>
-                    <h3 className="text-[11px] font-black text-stone-400 uppercase tracking-[0.3em] mb-4">{title}</h3>
-                    <div className="flex items-baseline gap-4">
-                        <span className="text-6xl font-black text-[#1c1917] tracking-tighter tabular-nums leading-none">{value}</span>
-                        <span className="text-[10px] text-stone-400 font-black uppercase tracking-widest">{subValue}</span>
+                    <h3 className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">{title}</h3>
+                    <div className="flex items-baseline gap-3">
+                        <span className="text-4xl font-bold text-gray-900 tracking-tight tabular-nums leading-none">{value}</span>
+                        <span className="text-sm text-gray-500 font-medium">{subValue}</span>
                     </div>
                 </div>
 
-                <div className="flex items-center gap-4 px-6 py-3 bg-stone-50 border-2 border-[#1c1917] cursor-pointer hover:bg-stone-100 transition-human active:scale-95 group">
-                    <Calendar size={18} className="text-[#1c1917]" />
-                    <span className="text-[11px] text-[#1c1917] font-black uppercase tracking-widest">Historical View</span>
+                <div className="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-50 transition-colors shadow-sm group">
+                    <Calendar size={16} className="text-gray-500 group-hover:text-indigo-600 transition-colors" />
+                    <span className="text-sm font-medium text-gray-700">Historical View</span>
                 </div>
             </div>
 
-            <div className="h-[380px] w-full">
+            <div className="h-[320px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                     <LineChart
                         data={chartData}
-                        margin={{ top: 20, right: 30, left: -20, bottom: 0 }}
+                        margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
                     >
                         <CartesianGrid
-                            strokeDasharray="0"
+                            strokeDasharray="3 3"
                             vertical={false}
-                            stroke="#f5f5f4"
+                            stroke="#f1f5f9"
                         />
                         <XAxis
                             dataKey="name"
-                            axisLine={{ stroke: '#1c1917', strokeWidth: 2 }}
+                            axisLine={false}
                             tickLine={false}
-                            tick={{ fill: '#a8a29e', fontSize: 10, fontWeight: 900 }}
-                            dy={15}
+                            tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 500 }}
+                            dy={10}
                         />
                         <YAxis
-                            axisLine={{ stroke: '#1c1917', strokeWidth: 2 }}
+                            axisLine={false}
                             tickLine={false}
-                            tick={{ fill: '#a8a29e', fontSize: 10, fontWeight: 900 }}
+                            tick={{ fill: '#94a3b8', fontSize: 12, fontWeight: 500 }}
                             domain={[0, 'auto']}
                             tickCount={5}
                         />
                         <Tooltip
                             content={<CustomTooltip />}
-                            cursor={{ stroke: '#1c1917', strokeWidth: 1.5, strokeDasharray: '4 4' }}
+                            cursor={{ stroke: '#cbd5e1', strokeWidth: 1, strokeDasharray: '4 4' }}
                         />
                         <Line
-                            type="linear" // Sharp linear lines for boxy look
+                            type="monotone" // Smooth curved lines to look modern
                             dataKey="value"
-                            stroke="#1c1917"
+                            stroke="#4f46e5" // Soft indigo
                             strokeWidth={3}
-                            dot={{ r: 4, fill: "#fff", stroke: "#1c1917", strokeWidth: 2 }}
-                            activeDot={{ r: 6, fill: "#4d6bfe", stroke: "#1c1917", strokeWidth: 2 }}
-                            animationDuration={1000}
+                            dot={{ r: 4, fill: "#ffffff", stroke: "#4f46e5", strokeWidth: 2 }}
+                            activeDot={{ r: 6, fill: "#4f46e5", stroke: "#ffffff", strokeWidth: 2 }}
+                            animationDuration={1500}
                         />
                     </LineChart>
                 </ResponsiveContainer>
             </div>
 
-            <div className="mt-12 text-center pt-8 border-t border-stone-100">
-                <p className="text-[10px] text-stone-300 font-black uppercase tracking-[0.4em]">Integrated System Telemetry &mdash; LOG_V_1.0.4</p>
+            <div className="mt-8 text-center pt-6 border-t border-gray-100">
+                <p className="text-xs text-gray-400 font-medium tracking-wide">Integrated System Telemetry &bull; Version 1.0</p>
             </div>
         </div>
     );

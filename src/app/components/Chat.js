@@ -115,7 +115,19 @@ export default function Chat() {
               const aVal = a.data().updatedAt?.toMillis() || 0;
               return bVal - aVal;
             });
-            setChatId(sortedDocs[0].id);
+
+            // Check if 12 hours have passed since the last chat was updated
+            const lastChat = sortedDocs[0];
+            const lastUpdatedMillis = lastChat.data().updatedAt?.toMillis() || 0;
+            const nowMillis = Date.now();
+            const twelveHoursMillis = 12 * 60 * 60 * 1000;
+            
+            if (nowMillis - lastUpdatedMillis > twelveHoursMillis) {
+              console.log("Last chat is older than 12 hours. Creating a new auto-chat.");
+              createNewChat();
+            } else {
+              setChatId(lastChat.id);
+            }
           } else {
             // No chats exist yet, create the first one
             createNewChat();
