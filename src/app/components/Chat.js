@@ -257,15 +257,15 @@ export default function Chat() {
         console.warn("Could not increment usage count:", err);
       }
 
-      // Update Chat Title if it's the first message
-      if (messages.length === 0) {
-        try {
+      try {
+        const updateData = { updatedAt: serverTimestamp() };
+        if (messages.length === 0) {
           const titleText = userMessage.trim();
-          const title = titleText.slice(0, 30) + (titleText.length > 30 ? "..." : "");
-          await updateDoc(doc(db, "chats", chatId), { title: title });
-        } catch (err) {
-          console.warn("Could not update chat title:", err.message);
+          updateData.title = titleText.slice(0, 30) + (titleText.length > 30 ? "..." : "");
         }
+        await updateDoc(doc(db, "chats", chatId), updateData);
+      } catch (err) {
+        console.warn("Could not update chat:", err.message);
       }
 
       const userMessageLower = userMessage.toLowerCase();
@@ -349,7 +349,7 @@ export default function Chat() {
       }
 
       // Prepare history for API (Including System Prompt for consistency)
-      const baseSystemMsg = `You are Bluebox, a friendly AI assistant. Your name is ONLY Bluebox. You were created specifically for this application. CRITICAL: Never mention LLaMA, Meta, Llama models, or any other AI company names. Keep your responses conversational, warm, and helpful. Note: The current date is ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} and the current time is ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}. ⚠️ IMPORTANT: If real-time context is provided below, you MUST use it to answer. Do NOT say you don't have up-to-date information if the context contains it. ⚠️ NEVER mention your "knowledge cutoff", "training data", or that you only have information up to 2023.`;
+      const baseSystemMsg = `You are Bluebox, a friendly AI assistant. Your name is ONLY Bluebox. You were created specifically for this application. CRITICAL: Never mention LLaMA, Meta, Llama models, or any other AI company names. Keep your responses conversational, warm, and helpful. When a user asks you to create a presentation or format content in a specific way (like PowerPoint, slides, outlines), you MUST proactively use rich markdown formatting: use clear headings (## Slide 1: Title), descriptive bullet points, bold text, and logical structure. Be highly accommodating to user formatting requests. Note: The current date is ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })} and the current time is ${new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}. ⚠️ IMPORTANT: If real-time context is provided below, you MUST use it to answer. Do NOT say you don't have up-to-date information if the context contains it. ⚠️ NEVER mention your "knowledge cutoff", "training data", or that you only have information up to 2023.`;
       const systemPrompt = {
         role: "system",
         content: (newsContext || webContext)

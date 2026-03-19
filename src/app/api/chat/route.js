@@ -6,8 +6,11 @@ const groq = new Groq({
 
 const MAX_MESSAGES = 12;
 
-async function callOpenRouter(messages, modelTier) {
-  // Use model from env if provided, otherwise default to a reliable free model
+/**
+ * Calls OpenRouter with streaming, properly parses SSE lines,
+ * and pipes clean text tokens into a ReadableStream.
+ */
+async function streamFromOpenRouter(messages, encoder) {
   const model = process.env.OPENROUTER_MODEL || "mistralai/mistral-7b-instruct:free";
   console.log(`OpenRouter: Falling back to model: ${model}`);
 
@@ -15,14 +18,15 @@ async function callOpenRouter(messages, modelTier) {
     method: "POST",
     headers: {
       "Authorization": `Bearer ${process.env.OPENROUTER_API_KEY}`,
-      "HTTP-Referer": "https://bluebox-ai.vercel.app", // Optional, for OpenRouter rankings
-      "X-Title": "Bluebox AI", // Optional
+      "HTTP-Referer": "https://bluebox-ai.vercel.app",
+      "X-Title": "Bluebox AI",
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
       model: model,
       messages: messages,
       stream: true,
+      max_tokens: 1024,
     }),
   });
 
@@ -31,7 +35,46 @@ async function callOpenRouter(messages, modelTier) {
     throw new Error(`OpenRouter API error: ${response.status} ${errorText}`);
   }
 
-  return response.body;
+  const reader = response.body.getReader();
+  const decoder = new TextDecoder();
+
+  // Build a ReadableStream that parses SSE lines and emits raw text tokens
+  return new ReadableStream({
+    async start(controller) {
+      let buffer = "";
+      try {
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+          // Keep the last potentially incomplete line in the buffer
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed || trimmed === "data: [DONE]") continue;
+            if (!trimmed.startsWith("data: ")) continue;
+
+            try {
+              const json = JSON.parse(trimmed.slice(6)); // remove "data: "
+              const text = json.choices?.[0]?.delta?.content;
+              if (text) {
+                controller.enqueue(encoder.encode(text));
+              }
+            } catch {
+              // ignore malformed SSE lines
+            }
+          }
+        }
+      } catch (err) {
+        console.error("OpenRouter stream error:", err);
+      } finally {
+        controller.close();
+      }
+    },
+  });
 }
 
 export async function POST(req) {
@@ -65,7 +108,7 @@ export async function POST(req) {
 
     let modelObj;
     if (hasImage) {
-      modelObj = "groq/meta-llama/llama-4-scout-17b-16e-instruct";
+      modelObj = "meta-llama/llama-4-scout-17b-16e-instruct";
     } else {
       modelObj = modelTier === "premium" ? "llama-3.3-70b-versatile" : "llama-3.1-8b-instant";
     }
@@ -73,20 +116,20 @@ export async function POST(req) {
     const finalMessages = [
       existingSystemMsg || {
         role: "system",
-        content: `You are Bluebox, a friendly AI assistant. Your name is ONLY Bluebox. Use natural conversational fillers. Reactions make you feel more real. Note: The current date is ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}. ⚠️ IMPORTANT: NEVER mention your "knowledge cutoff", "training data", or that you only have information up to 2023.`
+        content: `You are Bluebox, a friendly AI assistant. Your name is ONLY Bluebox. Use natural conversational fillers. When asked for presentations or specific formats, strictly use clear markdown formatting with slides, bullet points, headers, etc. Note: The current date is ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}. ⚠️ IMPORTANT: NEVER mention your "knowledge cutoff", "training data", or that you only have information up to 2023.`
       },
       ...history,
     ];
 
     const encoder = new TextEncoder();
 
-    // Try Groq First
+    // ── Try Groq First ──
     try {
       console.log(`Tier: ${modelTier}, Attempting Groq with: ${modelObj}`);
       const stream = await groq.chat.completions.create({
         model: modelObj,
         messages: finalMessages,
-        max_tokens: 512,
+        max_tokens: 1024,
         temperature: 0.7,
         stream: true,
       });
@@ -98,14 +141,10 @@ export async function POST(req) {
               const text = chunk.choices?.[0]?.delta?.content;
               if (text) {
                 controller.enqueue(encoder.encode(text));
-                const lagBase = modelTier === "premium" ? 0 : 60;
-                await new Promise(resolve => setTimeout(resolve, Math.random() * 20 + lagBase));
               }
             }
           } catch (err) {
             console.error("GROQ STREAM ERROR:", err);
-            // Note: If streaming has already started, we can't easily fall back to a NEW stream
-            // for the same response object. This catch is for errors DURING streaming.
           } finally {
             controller.close();
           }
@@ -121,20 +160,21 @@ export async function POST(req) {
       console.log("Attempting fallback to OpenRouter...");
 
       try {
-        const openRouterStream = await callOpenRouter(finalMessages, modelTier);
-
-        // OpenRouter returns a standard Fetch ReadableStream
-        return new Response(openRouterStream, {
+        const orStream = await streamFromOpenRouter(finalMessages, encoder);
+        return new Response(orStream, {
           headers: { "Content-Type": "text/plain; charset=utf-8" },
         });
       } catch (orErr) {
         console.error("OPENROUTER FALLBACK ERROR:", orErr.message);
-        throw new Error(`Both Groq and OpenRouter failed. Groq: ${groqErr.message}, OR: ${orErr.message}`);
+        throw new Error("Bluebox is currently experiencing high traffic or a temporary outage. Please try again in a few moments.");
       }
     }
 
   } catch (err) {
     console.error("CHAT API ERROR DETAIL:", err);
-    return new Response(`Chat failed: ${err.message || "Unknown error"}`, { status: 500 });
+    const userMessage = err.message.includes("Bluebox is currently")
+      ? err.message
+      : "Bluebox has encountered an unexpected error. Please try again later.";
+    return new Response(userMessage, { status: 500 });
   }
 }

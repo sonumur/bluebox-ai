@@ -50,7 +50,7 @@ export default function UserChatViewer({ userId, userName, userEmail, onClose })
     setLoadingMessages(true);
     const q = query(
       collection(db, "chats", selectedChatId, "messages"),
-      orderBy("timestamp", "asc")
+      orderBy("createdAt", "asc")
     );
     
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -177,9 +177,9 @@ export default function UserChatViewer({ userId, userName, userEmail, onClose })
                               : 'bg-white border border-gray-100 text-gray-800 rounded-tl-sm'
                           }`}>
                             <p className="whitespace-pre-wrap">{msg.content}</p>
-                            {msg.timestamp && (
+                            {msg.createdAt && (
                               <p className={`text-[10px] mt-2 font-medium ${isUser ? 'text-indigo-200' : 'text-gray-400'}`}>
-                                {formatDate(msg.timestamp)}
+                                {formatDate(msg.createdAt)}
                               </p>
                             )}
                           </div>
