@@ -243,21 +243,21 @@ export default function InputBar({ onSend, isPro }) {
 
       {/* ── MAIN INPUT BOX ── */}
       <div
-        className={`relative rounded-2xl md:rounded-[1.5rem] p-[1.5px] transition-all duration-700
+        className={`relative rounded-[1.5rem] md:rounded-[2rem] p-[1.5px] transition-all duration-700
           ${isPro
             ? "bg-gradient-to-r from-[#BF953F] via-[#FCF6BA] to-[#B38728] shadow-[0_0_15px_rgba(252,246,186,0.3)] drop-shadow-[0_0_5px_rgba(191,149,63,0.2)]"
-            : "bg-white/10 backdrop-blur-md"
+            : "glass-card border border-white/80 shadow-[0_8px_40px_rgba(0,0,0,0.06)]"
           }
         `}
       >
         <div className={`
-          relative rounded-[calc(1rem-0.5px)] md:rounded-[calc(1.5rem-0.5px)] p-1.5 md:p-2 transition-all duration-300
+          relative rounded-[calc(1.5rem-0.5px)] md:rounded-[calc(2rem-0.5px)] p-1.5 md:p-2 transition-all duration-300
           ${isPro
             ? "bg-white"
-            : "bg-white/60 backdrop-blur-md border border-white/20 shadow-[0_4px_20px_rgba(0,0,0,0.03)]"
+            : "bg-white/80 backdrop-blur-xl"
           }
           focus-within:shadow-[0_8px_32px_rgba(0,0,0,0.08)]
-          ${isPro ? "focus-within:shadow-[0_0_20px_rgba(252,246,186,0.4)]" : "focus-within:border-gray-200"}
+          ${isPro ? "focus-within:shadow-[0_0_20px_rgba(252,246,186,0.4)]" : "focus-within:bg-white"}
           flex flex-col gap-2
         `}>
 
@@ -279,7 +279,7 @@ export default function InputBar({ onSend, isPro }) {
               placeholder={listening ? "🎙️ Listening… speak now" : "Message Bluebox"}
               rows={1}
               spellCheck="true"
-              className="w-full bg-transparent outline-none text-gray-800 text-base md:text-lg placeholder-gray-400 resize-none max-h-[200px] py-1 md:py-1.5"
+              className="w-full bg-transparent outline-none text-slate-800 text-base md:text-lg font-medium placeholder-slate-400 resize-none max-h-[200px] py-1 md:py-1.5"
               style={listening ? { caretColor: "#ef4444" } : {}}
             />
           </div>

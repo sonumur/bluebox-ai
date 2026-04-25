@@ -76,7 +76,7 @@ export default function Sidebar({ isOpen, onClose, onSelectChat, onNewChat, acti
       `}>
 
                 {/* Chat List Container */}
-                <div className="w-[280px] md:w-60 bg-[#f9f9f9] border-r border-[#e5e5e5] flex flex-col shadow-2xl md:shadow-none">
+                <div className="w-[280px] md:w-60 bg-white/60 backdrop-blur-2xl border-r border-slate-100/50 flex flex-col shadow-[4px_0_24px_rgba(0,0,0,0.02)] md:shadow-none">
                     {/* New Chat Button */}
                     <div className="p-4">
                         <button
@@ -84,15 +84,15 @@ export default function Sidebar({ isOpen, onClose, onSelectChat, onNewChat, acti
                                 onNewChat();
                                 if (window.innerWidth < 768) onClose();
                             }}
-                            className="w-full flex items-center justify-between px-4 py-3 bg-white hover:bg-gray-50 text-gray-700 rounded-2xl transition-all border border-[#e5e5e5] shadow-sm font-medium text-sm group"
+                            className="w-full flex items-center justify-between px-4 py-3 bg-gradient-to-tr from-indigo-600 to-indigo-500 hover:from-indigo-700 hover:to-indigo-600 text-white rounded-2xl transition-all shadow-[0_4px_12px_rgba(79,70,229,0.25)] hover:shadow-[0_6px_16px_rgba(79,70,229,0.35)] font-bold text-sm group"
                         >
                             <div className="flex items-center gap-2.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-[#4d6bfe]">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4 text-white">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
                                 </svg>
                                 <span>New chat</span>
                             </div>
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-4 h-4 text-gray-400 group-hover:text-gray-600 transition-transform group-hover:rotate-12">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4 text-indigo-200 group-hover:text-white transition-transform group-hover:rotate-12">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
                             </svg>
                         </button>
@@ -116,7 +116,7 @@ export default function Sidebar({ isOpen, onClose, onSelectChat, onNewChat, acti
                                         }}
                                         className={`
                       group flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-all text-sm
-                      ${activeChatId === chat.id ? "bg-[#eef1ff] text-[#4d6bfe] font-medium" : "text-gray-600 hover:bg-gray-200/50 hover:text-gray-900"}
+                      ${activeChatId === chat.id ? "bg-indigo-50/80 text-indigo-700 font-bold shadow-sm border border-indigo-100/50" : "text-slate-600 hover:bg-slate-100/50 hover:text-slate-900 font-medium"}
                     `}
                                     >
                                         <div className="truncate flex-1">
@@ -145,7 +145,7 @@ export default function Sidebar({ isOpen, onClose, onSelectChat, onNewChat, acti
                     </div>
 
                     {/* User Info (Footer) */}
-                    <div className="p-4 border-t border-[#e5e5e5] bg-[#f9f9f9]">
+                    <div className="p-4 border-t border-slate-100/50 bg-white/40">
                         <div
                             onClick={handleSignOut}
                             className="flex items-center gap-3 group cursor-pointer hover:bg-red-50 p-2 rounded-xl transition-all"

@@ -1,16 +1,22 @@
 import ReactMarkdown from 'react-markdown';
 import { memo } from 'react';
+import { motion } from 'framer-motion';
 
 function MessageBubble({ role, content, isTyping }) {
   const isUser = role === "user";
 
   return (
-    <div className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`}>
+    <motion.div 
+      initial={{ opacity: 0, y: 15, scale: 0.98 }}
+      animate={{ opacity: 1, y: 0, scale: 1 }}
+      transition={{ duration: 0.4, ease: "easeOut" }}
+      className={`flex w-full ${isUser ? "justify-end" : "justify-start"}`}
+    >
       <div
-        className={`max-w-[92%] md:max-w-[85%] rounded-2xl transition-all 
+        className={`max-w-[92%] md:max-w-[85%] transition-all 
         ${isUser
-            ? "bg-[#f4f4f4] text-gray-800 px-3.5 py-2 md:px-4 md:py-2.5 rounded-br-none shadow-sm"
-            : "bg-transparent text-gray-800 px-0 py-2"
+            ? "bg-white/80 backdrop-blur-xl text-slate-800 px-4 py-3 md:px-5 md:py-3.5 rounded-[1.5rem] rounded-br-sm shadow-md border border-white/60"
+            : "bg-transparent text-slate-800 px-0 md:px-2 py-2"
           }`}
       >
         {!isUser && (
@@ -29,13 +35,13 @@ function MessageBubble({ role, content, isTyping }) {
                 ul: ({ node, ...props }) => <ul className="list-disc pl-5 mb-3" {...props} />,
                 ol: ({ node, ...props }) => <ol className="list-decimal pl-5 mb-3" {...props} />,
                 li: ({ node, ...props }) => <li className="mb-1" {...props} />,
-                p: ({ node, ...props }) => <p className="mb-3 last:mb-0" {...props} />,
-                strong: ({ node, ...props }) => <strong className="font-bold text-gray-900" {...props} />,
-                pre: ({ node, ...props }) => <pre className="bg-gray-50 border border-gray-100 p-3 rounded-xl overflow-x-auto mb-3 text-sm" {...props} />,
+                p: ({ node, ...props }) => <p className="mb-3 last:mb-0 font-medium" {...props} />,
+                strong: ({ node, ...props }) => <strong className="font-bold text-slate-900" {...props} />,
+                pre: ({ node, ...props }) => <pre className="bg-slate-50 border border-slate-200 p-4 rounded-2xl overflow-x-auto mb-3 text-[13px] shadow-sm" {...props} />,
                 code: ({ node, inline, ...props }) => (
                   inline
-                    ? <code className="bg-gray-100 px-1 py-0.5 rounded text-xs font-medium" {...props} />
-                    : <code className="block text-xs font-mono" {...props} />
+                    ? <code className="bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded-md text-xs font-semibold border border-indigo-100" {...props} />
+                    : <code className="block text-xs font-mono text-slate-800" {...props} />
                 ),
               }}
             >
@@ -59,13 +65,13 @@ function MessageBubble({ role, content, isTyping }) {
                       ul: ({ node, ...props }) => <ul className="list-disc pl-5 mb-3" {...props} />,
                       ol: ({ node, ...props }) => <ol className="list-decimal pl-5 mb-3" {...props} />,
                       li: ({ node, ...props }) => <li className="mb-1" {...props} />,
-                      p: ({ node, ...props }) => <p className="mb-3 last:mb-0" {...props} />,
-                      strong: ({ node, ...props }) => <strong className="font-bold text-gray-900" {...props} />,
-                      pre: ({ node, ...props }) => <pre className="bg-gray-50 border border-gray-100 p-3 rounded-xl overflow-x-auto mb-3 text-sm" {...props} />,
+                      p: ({ node, ...props }) => <p className="mb-3 last:mb-0 font-medium" {...props} />,
+                      strong: ({ node, ...props }) => <strong className="font-bold text-slate-900" {...props} />,
+                      pre: ({ node, ...props }) => <pre className="bg-slate-50 border border-slate-200 p-4 rounded-2xl overflow-x-auto mb-3 text-[13px] shadow-sm" {...props} />,
                       code: ({ node, inline, ...props }) => (
                         inline
-                          ? <code className="bg-gray-100 px-1 py-0.5 rounded text-xs font-medium" {...props} />
-                          : <code className="block text-xs font-mono" {...props} />
+                          ? <code className="bg-indigo-50 text-indigo-700 px-1.5 py-0.5 rounded-md text-xs font-semibold border border-indigo-100" {...props} />
+                          : <code className="block text-xs font-mono text-slate-800" {...props} />
                       ),
                     }}
                   >
@@ -87,14 +93,14 @@ function MessageBubble({ role, content, isTyping }) {
           )}
           {isTyping && (
             <div className="flex items-center gap-1 mt-2">
-              <div className="w-1.5 h-1.5 bg-[#4d6bfe] rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
-              <div className="w-1.5 h-1.5 bg-[#4d6bfe] rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
-              <div className="w-1.5 h-1.5 bg-[#4d6bfe] rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+              <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+              <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+              <div className="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
             </div>
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }
 

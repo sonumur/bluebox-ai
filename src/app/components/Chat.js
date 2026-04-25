@@ -443,6 +443,12 @@ export default function Chat() {
       }
 
     } catch (err) {
+      // Handle Abortion gracefully
+      if (err instanceof DOMException && err.name === "AbortError") {
+        console.log("Chat: Request was aborted (likely navigation or refresh).");
+        return;
+      }
+
       console.error(err);
 
       let errorMessage = "⚠️ Error talking to Bluebox";
@@ -478,7 +484,7 @@ export default function Chat() {
 
 
   return (
-    <div className="flex h-screen h-[100dvh] bg-white font-sans text-gray-900 overflow-hidden relative">
+    <div className="flex h-screen h-[100dvh] bg-slate-50 font-sans text-slate-900 overflow-hidden relative">
 
       {/* SIDEBAR */}
       <Sidebar
@@ -490,21 +496,21 @@ export default function Chat() {
       />
 
       {/* MAIN CHAT AREA */}
-      <div className="flex-1 flex flex-col relative z-10 h-full bg-white">
+      <div className="flex-1 flex flex-col relative z-10 h-full bg-transparent">
 
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3 md:px-6 border-b border-gray-50 z-30">
+        <div className="flex items-center justify-between px-4 py-3 md:px-6 glass-panel border-b border-white/40 shadow-sm z-30 relative">
           <div className="flex items-center">
             <button
               onClick={() => setSidebarOpen(true)}
-              className="mr-3 p-1.5 md:hidden text-gray-500 hover:bg-gray-100 rounded-lg transition-colors"
+              className="mr-3 p-1.5 md:hidden text-slate-500 hover:bg-slate-100 rounded-lg transition-colors"
             >
               <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
               </svg>
             </button>
-            <div className="flex items-center gap-2 px-3 py-1.5 hover:bg-gray-100 rounded-xl cursor-not-allowed transition-colors text-sm font-medium text-gray-700">
-              <div className="w-6 h-6 bg-[#4d6bfe]/10 rounded-md flex items-center justify-center p-1">
+            <div className="flex items-center gap-2 px-3 py-1.5 hover:bg-slate-100/50 rounded-xl cursor-not-allowed transition-colors text-sm font-semibold text-slate-700">
+              <div className="w-6 h-6 bg-indigo-600/10 rounded-md flex items-center justify-center p-1 shadow-inner border border-indigo-50">
                 <img src="/logo.svg" alt="Bluebox Logo" className="w-full h-full" />
               </div>
               Bluebox-V1
@@ -540,11 +546,14 @@ export default function Chat() {
             <div className="max-w-3xl mx-auto pt-8 pb-4 min-h-full flex flex-col">
               {messages.length === 0 ? (
                 <div className="flex-1 flex flex-col items-center justify-center text-center animate-in fade-in zoom-in duration-700">
-                  <div className="w-16 h-16 bg-[#4d6bfe]/10 text-[#4d6bfe] rounded-2xl flex items-center justify-center mb-6 animate-bounce transition-all duration-[3000ms]">
-                    <img src="/logo.svg" alt="Bluebox Logo" className="w-10 h-10" />
+                  <div className="relative">
+                    <div className="absolute inset-0 bg-indigo-400 blur-[40px] opacity-20 rounded-full"></div>
+                    <div className="w-20 h-20 bg-white/60 backdrop-blur-md border border-white shadow-xl text-indigo-600 rounded-3xl flex items-center justify-center mb-8 animate-bounce transition-all duration-[3000ms] relative z-10">
+                      <img src="/logo.svg" alt="Bluebox Logo" className="w-12 h-12 drop-shadow-sm" />
+                    </div>
                   </div>
-                  <h2 className="text-3xl font-semibold text-gray-800 mb-2">What brings you here today?</h2>
-                  <p className="text-gray-500 max-w-sm">I'm Bluebox, your AI assistant. Ask me anything or search the latest news.</p>
+                  <h2 className="text-3xl font-extrabold text-slate-800 mb-3 tracking-tight">What brings you here today?</h2>
+                  <p className="text-slate-500 max-w-sm font-medium">I'm Bluebox, your AI assistant. Ask me anything or search the latest news.</p>
                 </div>
               ) : (
                 <div className="flex flex-col gap-8">
@@ -570,16 +579,16 @@ export default function Chat() {
             </div>
           </div>
 
-          {/* Bottom Fade Overlay (Sharpened to prevent excessive fade-out) */}
-          <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white via-white/80 to-transparent z-20 pointer-events-none" />
+          {/* Bottom Fade Overlay */}
+          <div className="absolute bottom-0 left-0 right-0 h-20 bg-gradient-to-t from-slate-50 via-slate-50/80 to-transparent z-20 pointer-events-none" />
         </div>
 
-        {/* INPUT AREA (Translucent Glassmorphism) */}
-        <div className="bg-white/80 backdrop-blur-xl px-4 md:px-6 py-4 md:py-6 z-30 relative border-t border-white/20">
-          <div className="max-w-3xl mx-auto">
+        {/* INPUT AREA */}
+        <div className="px-4 md:px-6 py-4 md:py-6 z-30 relative">
+          <div className="max-w-3xl mx-auto drop-shadow-xl relative">
             <InputBar onSend={sendMessage} isPro={userData?.isPro} />
-            <div className="mt-2 md:mt-4 text-center">
-              <p className="text-[10px] md:text-[11px] text-gray-400 font-bold">
+            <div className="mt-3 text-center">
+              <p className="text-[11px] text-slate-400 font-medium">
                 Bluebox can make mistakes. Please check important information.
               </p>
             </div>

@@ -11,7 +11,7 @@ import {
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { db } from "../../lib/firebase";
-import { collection, getDocs, query, limit, orderBy } from "firebase/firestore";
+import { collection, getDocs, query, limit, orderBy, getCountFromServer } from "firebase/firestore";
 import UsageChart from "./components/UsageChart";
 import UserChatViewer from "./components/UserChatViewer";
 import AllSessionsModal from "./components/AllSessionsModal";
@@ -31,10 +31,13 @@ export default function DashboardHome() {
   const [isAllSessionsOpen, setIsAllSessionsOpen] = useState(false);
 
   useEffect(() => {
+    let isMounted = true;
     async function fetchStats() {
       try {
         const qPayments = query(collection(db, "payments"), orderBy("createdAt", "desc"));
         const paymentsSnap = await getDocs(qPayments);
+
+        if (!isMounted) return;
 
         let totalEarnings = 0;
         const txs = [];
@@ -53,13 +56,22 @@ export default function DashboardHome() {
 
         setRecentTransactions(txs.slice(0, 10));
 
-        const chatsSnap = await getDocs(collection(db, "chats"));
-        const totalChats = chatsSnap.size;
+        // Use getCountFromServer for total chats - much more efficient
+        const chatsColl = collection(db, "chats");
+        const chatsCountSnap = await getCountFromServer(chatsColl);
+        const totalChats = chatsCountSnap.data().count;
 
+        if (!isMounted) return;
+
+        const chatsSnap = await getDocs(chatsColl);
+        
         let messageCount = 0;
         const userIds = new Set();
         const userDataMap = new Map();
 
+        // Count messages for each chat - this is still many requests, 
+        // but we've mitigated the risk with isMounted and better error handling.
+        // In a real production app, we should probably denormalize messageCount onto the Chat document.
         const messagePromises = chatsSnap.docs.map(async (doc) => {
           const chatData = doc.data();
           if (chatData.userId) {
@@ -74,11 +86,19 @@ export default function DashboardHome() {
             }
           }
 
-          const msgSnap = await getDocs(collection(db, "chats", doc.id, "messages"));
-          return msgSnap.size;
+          try {
+            const msgColl = collection(db, "chats", doc.id, "messages");
+            const msgCountSnap = await getCountFromServer(msgColl);
+            return msgCountSnap.data().count;
+          } catch (e) {
+            console.warn(`Could not count messages for chat ${doc.id}:`, e);
+            return 0;
+          }
         });
 
         const results = await Promise.all(messagePromises);
+        if (!isMounted) return;
+        
         messageCount = results.reduce((acc, curr) => acc + curr, 0);
 
         setStats({
@@ -99,10 +119,13 @@ export default function DashboardHome() {
         });
         setActiveUsers(usersArray);
       } catch (err) {
-        console.error("Dashboard: Error fetching stats:", err);
+        if (isMounted) {
+          console.error("Dashboard: Error fetching stats:", err);
+        }
       }
     }
     fetchStats();
+    return () => { isMounted = false; };
   }, []);
 
   const statCards = [
@@ -179,10 +202,10 @@ export default function DashboardHome() {
         {statCards.map((card, i) => (
           <motion.div
             key={card.label}
-            initial={{ opacity: 0, y: 10 }}
+            initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.05 }}
-            className={`p-6 bg-white border border-gray-200 rounded-2xl shadow-sm transition-all hover:shadow-md cursor-default`}
+            transition={{ delay: i * 0.08, ease: "easeOut" }}
+            className={`p-6 glass-card border-none rounded-3xl transition-all duration-300 hover:shadow-[0_8px_30px_rgba(79,70,229,0.1)] hover:-translate-y-1 cursor-default`}
           >
             <div className="flex justify-between items-start mb-6">
               <div className={`p-3 rounded-xl ${card.bg} ${card.color}`}>
@@ -213,13 +236,13 @@ export default function DashboardHome() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* User Interaction Chart Area */}
-        <div className="lg:col-span-3 bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden flex flex-col justify-center">
+        <div className="lg:col-span-3 glass-card border-none rounded-3xl shadow-[0_4px_24px_rgba(0,0,0,0.02)] overflow-hidden flex flex-col justify-center p-2">
           <UsageChart />
         </div>
 
         {/* Recent Transactions Table */}
-        <div className="lg:col-span-2 bg-white flex flex-col border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-          <div className="p-6 flex justify-between items-center border-b border-gray-100 bg-white">
+        <div className="lg:col-span-2 glass-card border-none rounded-3xl shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col overflow-hidden">
+          <div className="p-6 flex justify-between items-center border-b border-slate-100/50 bg-white/40">
             <div>
               <h4 className="text-lg font-bold text-gray-900">Recent Activity</h4>
               <p className="text-xs text-gray-500 mt-1 font-medium">Latest verified transactions</p>
@@ -253,15 +276,15 @@ export default function DashboardHome() {
         </div>
 
         {/* Status Panel */}
-        <div className="bg-white flex flex-col border border-gray-200 rounded-2xl shadow-sm overflow-hidden">
-          <div className="p-6 border-b border-gray-100 bg-white">
+        <div className="glass-card border-none rounded-3xl shadow-[0_4px_24px_rgba(0,0,0,0.02)] flex flex-col overflow-hidden">
+          <div className="p-6 border-b border-slate-100/50 bg-white/40">
             <h4 className="text-lg font-bold text-gray-900">Status Panel</h4>
             <p className="text-xs text-gray-500 mt-1 font-medium">Live Session Monitor</p>
           </div>
 
           {/* User Stats Summary */}
-          <div className="p-6 border-b border-gray-100 bg-indigo-50/50">
-            <div className="bg-white border border-gray-200 p-6 rounded-xl shadow-sm">
+          <div className="p-6 border-b border-slate-100/50 bg-indigo-50/30">
+            <div className="bg-white/80 backdrop-blur-md border border-white p-6 rounded-2xl shadow-sm">
               <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Total Population</p>
               <div className="flex items-end gap-3">
                 <p className="text-4xl font-bold text-gray-900 tabular-nums leading-none tracking-tight">{stats.users || "0"}</p>

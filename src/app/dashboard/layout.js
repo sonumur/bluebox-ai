@@ -104,16 +104,16 @@ export default function DashboardLayout({ children }) {
   if (!isAuthorized) return null;
 
   return (
-    <div className="flex h-screen bg-gray-50 text-gray-900 font-sans overflow-hidden">
+    <div className="flex h-screen bg-slate-50/50 text-slate-900 font-sans overflow-hidden">
       {isSidebarOpen && (
         <div
-          className="fixed inset-0 bg-gray-900/20 backdrop-blur-sm z-20 lg:hidden transition-opacity duration-300"
+          className="fixed inset-0 bg-slate-900/20 backdrop-blur-sm z-20 lg:hidden transition-opacity duration-300"
           onClick={() => setIsSidebarOpen(false)}
         />
       )}
       <aside className={`
-        fixed inset-y-0 left-0 w-[260px] bg-white border-r border-gray-200 flex flex-col z-30
-        transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0
+        fixed inset-y-0 left-0 w-[260px] bg-white/80 backdrop-blur-2xl border-r border-slate-100 flex flex-col z-30
+        transition-transform duration-300 ease-in-out lg:relative lg:translate-x-0 shadow-[4px_0_24px_rgba(0,0,0,0.02)]
         ${isSidebarOpen ? "translate-x-0" : "-translate-x-full"}
       `}>
         <div className="h-16 flex items-center px-6 border-b border-gray-100">
@@ -232,7 +232,7 @@ export default function DashboardLayout({ children }) {
             </div>
           </div>
         </header>
-        <main className="flex-1 overflow-y-auto p-6 lg:p-10 bg-gray-50 relative">
+        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-10 bg-transparent relative">
           <div className="max-w-7xl mx-auto h-full box-border">
             {children}
           </div>
